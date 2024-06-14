@@ -1,6 +1,8 @@
 import { Section } from "../pages/Home";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getExpenses } from "../lib/api/expense";
 
 const ExpenseItemList = styled.div`
   display: flex;
@@ -60,8 +62,17 @@ const ExpenseDetails = styled.div`
   }
 `;
 
-export default function ExpenseList({ expenses }) {
+export default function ExpenseList({}) {
   const navigate = useNavigate();
+
+  const {
+    data: expenses = [],
+    isLoading,
+    error,
+  } = useQuery({ queryKey: ["expenses"], queryFn: getExpenses });
+
+  if (isLoading) return <div>로딩 중...</div>;
+  if (error) return <div>오류 발생: {error.message}</div>;
 
   return (
     <Section>
@@ -75,7 +86,7 @@ export default function ExpenseList({ expenses }) {
           >
             <ExpenseDetails>
               <span>{expense.date}</span>
-              <span>{`${expense.item} - ${expense.description}`}</span>
+              <span>{`${expense.item} - ${expense.description}  (${expense.createdBy}) `}</span>
             </ExpenseDetails>
             <span>{expense.amount.toLocaleString()} 원</span>
           </ExpenseItem>
